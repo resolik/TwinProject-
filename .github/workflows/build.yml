@@ -1,1 +1,31 @@
-YAML
+name: Build APK
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev
+          pip install --user --upgrade buildozer Cython==0.29.33
+
+      - name: Build with Buildozer
+        run: |
+          yes | buildozer android debug
+        shell: bash
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TwinProject-APK
+          path: bin/*.apk
+          

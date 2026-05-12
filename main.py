@@ -1,4 +1,6 @@
 import os
+from random import choice, randint
+
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
@@ -9,24 +11,24 @@ from kivy.graphics import Color, Rectangle, Ellipse, Mesh, RoundedRectangle
 from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.core.window import Window
-from random import choice, randint
 
-# Пути к ресурсам
+# Константы путей (используем относительные пути)
 BG_PATH = 'images/background.jpg'
-FONT_PATH = 'fonts/main_font.ttf' 
+FONT_PATH = 'fonts/main_font.ttf'
 
 class StyledButton(Button):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.background_normal = ''
         self.background_color = (0, 0, 0, 0)
+        # Проверка шрифта
         self.font_name = FONT_PATH if os.path.exists(FONT_PATH) else 'Roboto'
         self.bind(pos=self.update_canvas, size=self.update_canvas)
 
     def update_canvas(self, *args):
         self.canvas.before.clear()
         with self.canvas.before:
-            Color(1, 0.6, 0, 1) 
+            Color(1, 0.6, 0, 1)  # Оранжевый цвет
             RoundedRectangle(pos=self.pos, size=self.size, radius=[25,])
 
 class MenuScreen(Screen):
@@ -34,6 +36,7 @@ class MenuScreen(Screen):
         super().__init__(**kw)
         layout = FloatLayout()
         
+        # Фоновое изображение
         if os.path.exists(BG_PATH):
             layout.add_widget(Image(source=BG_PATH, allow_stretch=True, keep_ratio=False))
         
@@ -43,7 +46,8 @@ class MenuScreen(Screen):
             font_name=FONT_PATH if os.path.exists(FONT_PATH) else 'Roboto',
             pos_hint={'center_x': 0.5, 'center_y': 0.75},
             color=(1, 1, 1, 1),
-            outline_width=3, outline_color=(0,0,0,1)
+            outline_width=3, 
+            outline_color=(0, 0, 0, 1)
         )
         
         btn_play = StyledButton(
@@ -69,7 +73,6 @@ class GameScreen(Screen):
         if os.path.exists(BG_PATH):
             self.layout.add_widget(Image(source=BG_PATH, allow_stretch=True, keep_ratio=False))
         
-        # ТЕПЕРЬ ПО ЦЕНТРУ (center_x: 0.5)
         self.score_label = Label(
             text=f"SCORE: {self.score}",
             font_size='30sp',
@@ -77,30 +80,57 @@ class GameScreen(Screen):
             pos_hint={'center_x': 0.5, 'top': 0.97}, 
             color=(1, 1, 1, 1),
             size_hint=(None, None),
-            outline_width=2, outline_color=(0,0,0,1)
+            outline_width=2, 
+            outline_color=(0, 0, 0, 1)
         )
         
         self.add_widget(self.layout)
         self.add_widget(self.score_label)
-        self.event = Clock.schedule_interval(self.spawn_shape, 0.5)
+        # Интервал спавна фигур
+        self.event = Clock.schedule_interval(self.spawn_shape, 0.6)
 
     def spawn_shape(self, dt):
-        colors = [(1, 0, 0, 1), (1, 0.5, 0, 1), (1, 1, 0, 1), (0, 1, 0, 1), (0, 0, 1, 1), (0.2, 0, 0.5, 1), (0.5, 0, 1, 1), (1, 0.4, 0.7, 1)]
+        colors = [
+            (1, 0, 0, 1), (1, 0.5, 0, 1), (1, 1, 0, 1), 
+            (0, 1, 0, 1), (0, 0, 1, 1), (0.2, 0, 0.5, 1), 
+            (0.5, 0, 1, 1), (1, 0.4, 0.7, 1)
+        ]
         size_val = randint(180, 350)
         shape_color = choice(colors)
         shape_type = choice(['square', 'circle', 'triangle'])
         side = choice(['left', 'right', 'top', 'bottom'])
-        if side == 'left': start_pos = (-size_val, randint(0, Window.height)); end_pos = (Window.width + size_val, randint(0, Window.height))
-        elif side == 'right': start_pos = (Window.width + size_val, randint(0, Window.height)); end_pos = (-size_val, randint(0, Window.height))
-        elif side == 'top': start_pos = (randint(0, Window.width), Window.height + size_val); end_pos = (randint(0, Window.width), -size_val)
-        else: start_pos = (randint(0, Window.width), -size_val); end_pos = (randint(0, Window.width), Window.height + size_val)
-        shape = Button(size_hint=(None, None), size=(size_val, size_val), pos=start_pos, background_normal='', background_color=(0, 0, 0, 0))
+        
+        # Логика появления
+        if side == 'left':
+            start_pos = (-size_val, randint(0, Window.height))
+            end_pos = (Window.width + size_val, randint(0, Window.height))
+        elif side == 'right':
+            start_pos = (Window.width + size_val, randint(0, Window.height))
+            end_pos = (-size_val, randint(0, Window.height))
+        elif side == 'top':
+            start_pos = (randint(0, Window.width), Window.height + size_val)
+            end_pos = (randint(0, Window.width), -size_val)
+        else:
+            start_pos = (randint(0, Window.width), -size_val)
+            end_pos = (randint(0, Window.width), Window.height + size_val)
+            
+        shape = Button(
+            size_hint=(None, None), 
+            size=(size_val, size_val), 
+            pos=start_pos, 
+            background_normal='', 
+            background_color=(0, 0, 0, 0)
+        )
+        
         shape.shape_type = shape_type
         shape.shape_color = shape_color
+        
         self.draw_figure(shape)
         shape.bind(pos=self.draw_figure, on_press=self.on_hit)
         self.layout.add_widget(shape)
-        anim = Animation(x=end_pos[0], y=end_pos[1], duration=randint(1, 4))
+        
+        # Анимация движения
+        anim = Animation(x=end_pos[0], y=end_pos[1], duration=randint(2, 5))
         anim.bind(on_complete=lambda *args: self.remove_shape(shape))
         anim.start(shape)
 
@@ -110,21 +140,29 @@ class GameScreen(Screen):
             Color(*instance.shape_color)
             x, y = instance.pos
             w, h = instance.size
-            if instance.shape_type == 'square': Rectangle(pos=(x, y), size=(w, h))
-            elif instance.shape_type == 'circle': Ellipse(pos=(x, y), size=(w, h))
-            elif instance.shape_type == 'triangle': Mesh(vertices=[x, y, 0, 0, x+w, y, 0, 0, x+w/2, y+h, 0, 0], indices=[0, 1, 2], mode='triangles')
+            if instance.shape_type == 'square':
+                Rectangle(pos=(x, y), size=(w, h))
+            elif instance.shape_type == 'circle':
+                Ellipse(pos=(x, y), size=(w, h))
+            elif instance.shape_type == 'triangle':
+                Mesh(
+                    vertices=[x, y, 0, 0, x+w, y, 0, 0, x+w/2, y+h, 0, 0], 
+                    indices=[0, 1, 2], 
+                    mode='triangles'
+                )
 
     def on_hit(self, instance):
         self.score += 1
         self.score_label.text = f"SCORE: {self.score}"
-        self.layout.remove_widget(instance)
+        self.remove_shape(instance)
 
     def remove_shape(self, instance):
         if instance in self.layout.children:
             self.layout.remove_widget(instance)
 
     def on_leave(self):
-        Clock.unschedule(self.event)
+        if hasattr(self, 'event'):
+            Clock.unschedule(self.event)
         self.layout.clear_widgets()
 
 class MyGameApp(App):
@@ -136,3 +174,4 @@ class MyGameApp(App):
 
 if __name__ == '__main__':
     MyGameApp().run()
+        

@@ -4,31 +4,27 @@ package.name = twin
 package.domain = org.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,ttf
+version = 0.3
 
-# Изменил на 0.2, чтобы GitHub Actions не использовал старый битый кэш
-version = 0.2
-
-# Убрал hostpython3, оставил только базу
-requirements = python3,kivy
+# Оставляем только самый минимум. Cython и прочее Гитхаб поставит сам.
+requirements = python3,kivy==2.3.0
 
 orientation = portrait
-
-# Android specific
 fullscreen = 0
 android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.api = 33
 android.minapi = 21
 
-# ФИКС ОШИБКИ: явно задаем стабильную версию NDK
+# Вот тут магия: принудительно заставляем его использовать конкретную версию
 android.ndk = 25b
 android.ndk_api = 21
 
+# Добавь эту строку, если её нет, или проверь, чтобы было именно так:
+android.skip_update = False
 android.accept_sdk_license = True
 
-# Оставил только одну архитектуру для надежности первого билда
+# Оставляем только одну архитектуру (это ускорит билд и уменьшит шанс ошибки)
 android.archs = arm64-v8a
-
-android.allow_backup = True
 
 [buildozer]
 log_level = 2

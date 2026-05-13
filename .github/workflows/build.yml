@@ -3,24 +3,24 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    # Используем готовый образ, где всё уже настроено для Kivy
-    container:
-      image: ghcr.io/kivy/buildozer:master
-
+    runs-on: ubuntu-20.04  # Самая стабильная версия для сборки под Android
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'  # 3.9 — железобетонный стандарт для Buildozer
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev m4 libtool autoconf automake
+          pip install --upgrade pip
+          pip install Cython==0.29.33 buildozer
+
       - name: Build with Buildozer
         run: |
-          # В этом образе всё уже установлено, просто запускаем
+          export BUILDOZER_WARN_ON_ROOT=0
           buildozer -v android debug
-        env:
-          BUILDOZER_WARN_ON_ROOT: 0
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: TwinProject-APK
-          path: bin/*.apk
           

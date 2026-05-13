@@ -3,26 +3,27 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Используем стабильную версию, а не latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10' # 3.10 сейчас самая стабильная для Kivy
 
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev
-          pip install --user --upgrade buildozer Cython==0.29.33
+          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev m4 textinfo libtool autoconf automake
+          pip install --user --upgrade pip
+          pip install --user --upgrade Cython==0.29.33 buildozer virtualenv
 
       - name: Build with Buildozer
         run: |
-          # Фикс, чтобы билд не падал из-за прав доступа
           export BUILDOZER_WARN_ON_ROOT=0
-          yes | buildozer android debug
+          # Запускаем без 'yes |', так как в новом buildozer это может вызывать Broken Pipe
+          buildozer -v android debug
         shell: bash
 
       - name: Upload APK

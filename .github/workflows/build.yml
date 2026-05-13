@@ -3,32 +3,24 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Используем стабильную версию, а не latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # 3.10 сейчас самая стабильная для Kivy
+          python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev m4 textinfo libtool autoconf automake
-          pip install --user --upgrade pip
-          pip install --user --upgrade Cython==0.29.33 buildozer virtualenv
+          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev m4 libtool autoconf automake
+          pip install --upgrade pip
+          pip install Cython==0.29.33 buildozer
 
       - name: Build with Buildozer
         run: |
           export BUILDOZER_WARN_ON_ROOT=0
-          # Запускаем без 'yes |', так как в новом buildozer это может вызывать Broken Pipe
           buildozer -v android debug
-        shell: bash
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: TwinProject-APK
-          path: bin/*.apk
           

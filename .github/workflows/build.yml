@@ -12,14 +12,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsqlite3-dev
+          sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev
           pip install --user --upgrade buildozer Cython==0.29.33
 
       - name: Build with Buildozer
         run: |
+          # Фикс, чтобы билд не падал из-за прав доступа
+          export BUILDOZER_WARN_ON_ROOT=0
           yes | buildozer android debug
         shell: bash
 

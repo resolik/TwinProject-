@@ -3,18 +3,18 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Самая стабильная версия для сборки под Android
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'  # 3.9 — железобетонный стандарт для Buildozer
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
+          # Убрали update, ставим сразу. Если чего-то не хватит - он скажет.
           sudo apt-get install -y build-essential libffi-dev libssl-dev libsqlite3-dev m4 libtool autoconf automake
           pip install --upgrade pip
           pip install Cython==0.29.33 buildozer
@@ -22,5 +22,5 @@ jobs:
       - name: Build with Buildozer
         run: |
           export BUILDOZER_WARN_ON_ROOT=0
-          buildozer -v android debug
+          yes | buildozer -v android debug
           

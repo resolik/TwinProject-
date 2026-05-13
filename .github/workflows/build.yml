@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # Самая стабильная версия для сборки под Android
+    runs-on: ubuntu-22.04  # Самая стабильная версия для сборки под Android
     steps:
       - uses: actions/checkout@v4
 
